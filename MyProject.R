@@ -8,7 +8,7 @@
 #5)Using an information theory approach, assess the fit of phylogenetically corrected 
 #  models of hind-limb variation under different modes of character evolution
 
-library(tidyverse) # Rember to load your libraries!
+library(tidyverse) # Remember to load your libraries!
 library(ape)
 library(nlme)
 library(geiger)
@@ -34,5 +34,35 @@ anole2 <- anole%>%
 anole.log <- anole2%>%
   mutate_at(c("SVL", "HTotal","PH","ArbPD"),log)
 
+#does hind limb length vary with size? Let’s assess this initially by 
+#plotting hind limb length vs size
 anole2%>%
   ggplot(aes(SVL,HTotal))+geom_point()+geom_smooth(method="lm")
+
+anole.lm <- lm(HTotal~SVL,anole2)
+#here where asking R to build a linear model with HTotal predicted by SVL
+#The second parameter specifies what data the variables are coming from, in this case, anole2.
+coef(anole.lm)
+
+anole2%>%
+  ggplot(aes(SVL,HTotal))+geom_point()+geom_abline(slope=coef(anole.lm)[2],intercept=coef(anole.lm)[1],col="blue")
+
+SVL2 <- seq(min(anole2$SVL),max(anole2$SVL),0.1)
+
+pred.lm <-tibble(
+  SVL=SVL2,
+  H.pred=predict(anole.lm,newdata = data.frame(SVL=SVL2))
+)
+
+anole2%>%
+  ggplot(aes(SVL,HTotal))+geom_point()+geom_point(data=pred.lm,aes(SVL,H.pred),col="blue")
+
+summary(anole.lm)
+
+anole.allo <- nls(HTotal~a*SVL^b, start=list(b=1, a=1),data = anole2)
+
+summary(anole.allo)
+#so far, we’ve assessed the null hypothesis that SVL has no effect on HTotal 
+#and rejected it based on two statistical tests under different models, 
+#one linear, the other allometric.
+
