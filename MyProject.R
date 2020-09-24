@@ -1,0 +1,38 @@
+#Our tasks will be to:
+  
+#1) Visualize how hind limb length varies with size (i.e., allometry!).
+#2)Visualize and asses how hind limb length vs. size relationship covary with ecological niche.
+#3)Learn more complex operations in ggplot than we’ve undertaken so far.
+#4)Evaluate this hindlimb-size relationship using standard frequentist models within 
+#  and without a phylogenetic context.
+#5)Using an information theory approach, assess the fit of phylogenetically corrected 
+#  models of hind-limb variation under different modes of character evolution
+
+library(tidyverse) # Rember to load your libraries!
+library(ape)
+library(nlme)
+library(geiger)
+library(caper)
+library(phytools)
+library(viridis)
+library(MuMIn)
+
+
+#Remember to set your working directory, too!
+setwd("~/Schoolwork Fall 20/Organismal Biology/Module 3 Project")
+
+#load data
+anole <- read_csv("anole.dat.csv")
+anole.eco <- read_csv("anole.eco.csv")
+
+#must merge anole data tibble w anole.eco tibble
+anole2 <- anole%>%
+  left_join(anole.eco)%>%
+  filter(!Ecomorph%in%c("U","CH"))%>%
+  na.omit()%>%
+  print()
+anole.log <- anole2%>%
+  mutate_at(c("SVL", "HTotal","PH","ArbPD"),log)
+
+anole2%>%
+  ggplot(aes(SVL,HTotal))+geom_point()+geom_smooth(method="lm")
